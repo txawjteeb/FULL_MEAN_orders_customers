@@ -1,0 +1,61 @@
+<style>
+	#filter {
+		display: block;
+	}
+</style>
+<div ng-controller="ordersController">
+	<h3>Add a new order</h3>
+	<form>
+		<div>
+			Customer:
+			<select ng-model='new_order.name' style="width:300px; font-size: 18px">
+				<option ng-repeat='customer in customers'>{{customer.name}}</option>
+	        </select>
+        </div>
+        <div>
+    		Order:
+    		<select ng-model='new_order.quantity' style="font-size: 18px">
+    			<option>1</option>
+    			<option>2</option>
+    			<option>3</option>
+    			<option>4</option>
+    			<option>5</option>
+    			<option>6</option>
+    			<option>7</option>
+    			<option>8</option>
+    			<option>9</option>
+    			<option>10</option>
+			</select>
+			<select ng-model='new_order.product' style="width:266px; font-size: 18px">
+				<option>Nike Shoes</option>
+				<option>Black Belts</option>
+				<option>Ice Creams</option>
+				<option>Candies</option>
+			</select>
+			<input type="submit" class="button button default" ng-click="addOrder()" value="Order">
+		</div>
+	</form>
+	<div class="container" style="width: 960px">
+	<div class="u-pull-right">
+		<input type="text" ng-model="filter_name" placeholder="Filter">
+	</div>
+		<table class="u-full-width">
+			<thead>
+				<tr>
+					<th>Customer Name</th>
+					<th>Product</th>
+					<th>Quantity</th>
+					<th>Date</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="order in orders | filter: filter_name">
+					<td><span ng-bind="order.name"></span></td>
+					<td><span ng-bind="order.product"></span></td>
+					<td><span ng-bind="order.quantity"></span></td>
+					<td><span ng-bind="order.date | date:format:LongDate"></span></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

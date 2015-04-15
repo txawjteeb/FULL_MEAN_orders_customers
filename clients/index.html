@@ -1,0 +1,143 @@
+<html>
+<head>
+	<title>FULL MEAN Stack Orders and Customers</title>
+	<link rel="stylesheet" href="/skeleton.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.min.js"></script>
+	<script>
+		var store_app = angular.module('store_app', ['ngRoute']);
+	    //  use the config method to set up routing:
+	    store_app.config(function ($routeProvider) {
+	      $routeProvider
+	        .when('/customers',{
+	            templateUrl: './static/partials/customers.html'
+	        })
+	        .when('/orders',{
+	            templateUrl: './static/partials/orders.html'
+	        })
+	        .otherwise({
+	          redirectTo: '/'
+	        });
+	    });
+
+	    store_app.controller('customersController', function($scope, CustomerFactory){
+	    	CustomerFactory.getCustomers(function(data) {
+	    		$scope.customers = data;
+	    		console.log($scope.customers);
+	    	})
+	    	$scope.addCustomer = function() {
+	    		var date_string = new Date();
+	    		$scope.new_customer.date = date_string;
+	    		CustomerFactory.addCustomer($scope.new_customer, function() {
+	    			CustomerFactory.getCustomers(function(data) {
+	    				$scope.customers = data;
+	    			});
+	    			$scope.new_customer = {};
+	    		})
+	    	}
+
+	    	$scope.removeCustomer = function(id) {
+	    		console.log('passed the delete button with info', id);
+	    		CustomerFactory.removeCustomer(id, function() {
+	    			CustomerFactory.getCustomers(function(retrieve_customers) {
+	    				$scope.customers = retrieve_customers;
+	    			})
+	    		})
+	    	}
+	    })
+			store_app.factory('CustomerFactory', function($http) {
+		    	var factory = {};
+		    	var customers = [];
+
+		    	factory.getCustomers = function(callback) {
+		    		$http.get('/customers').success(function(output) {
+		    			customers = output;
+		    			callback(customers);
+		    		})
+		    	}
+		    	factory.addCustomer = function(info, callback) {
+		    		$http.post('/customers', info).success(function(data) {
+		    			console.log(data.name, data.date);
+		    			customers.push(data);
+		    		})
+		    	}
+		    	factory.removeCustomer = function(info, callback) {
+		    		console.log('about to remove customer in the factory')
+		    		$http.post('/remove_customer', info).success(function() {
+		    			callback();
+		    		})
+		    	}
+		    	return factory;
+		    })
+
+
+	    store_app.controller('ordersController', function($scope, OrderFactory, CustomerFactory){
+	    	OrderFactory.getOrders(function(data) {
+	    		$scope.orders = data;
+	    		console.log($scope.orders);
+	    	})
+	    	CustomerFactory.getCustomers(function(data) {
+	    		$scope.customers = data;
+	    		console.log($scope.customers);
+	    	})
+	    	$scope.addOrder = function() {
+	    		var date_string = new Date();
+	    		$scope.new_order.date = date_string;
+	    		OrderFactory.addOrder($scope.new_order, function() {
+	    			OrderFactory.getOrders(function(data) {
+	    				$scope.orders = data;
+	    			});
+	    		})
+    			$scope.new_order = {};
+	    	}
+
+
+	    })
+
+	    store_app.factory('OrderFactory', function($http) {
+	    	var factory =  {};
+	    	var orders = [];
+
+	    	factory.getOrders = function(callback) {
+	    		$http.get('/orders').success(function(output) {
+	    			orders = output;
+	    			callback(orders);
+	    		})
+	    	}
+	    	factory.addOrder = function(info, callback) {
+	    		$http.post('/orders', info).success(function(data) {
+	    			console.log(data.name, data.product, data.quantity, data.date);
+	    			orders.push(data);
+	    		})
+	    	}
+	    	return factory;
+	    })
+
+
+	</script>
+	<style>
+		table {
+			border: 1px solid black;
+			border-collapse: collapse;
+		}
+		th {
+			border: 1px solid black;
+			background-color: silver;
+		}
+		td {
+			border-left: 1px solid black;
+		}
+		#navbar {
+			border-bottom: 1px solid silver;
+		}
+	</style>
+</head>
+<body ng-app="store_app">
+	<div class="u-full-width" id="navbar">
+		<h1 align="center">David Lee's Store</h1>
+	</div>
+	<a href="#/customers">Customers</a> | <a href="#/orders">Orders</a>
+	<div ng-view="">
+	</div>
+</body>
+</html>
